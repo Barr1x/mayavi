@@ -136,16 +136,16 @@ pipeline {
                     cat > /tmp/job-request-${BUILD_NUMBER}.json << ENDJSON
 {
   "job": {
-    "placement": { "clusterName": "${DATAPROC_CLUSTER}" },
+    "placement": { "clusterName": "$DATAPROC_CLUSTER" },
     "hadoopJob": {
       "mainJarFileUri": "file:///usr/lib/hadoop/hadoop-streaming.jar",
       "args": [
         "-mapper",  "python3 mapper.py",
         "-reducer", "python3 reducer.py",
-        "-input",   "${INPUT_GCS}",
-        "-output",  "${OUTPUT_GCS}",
-        "-file",    "gs://${BUCKET}/scripts/mapper.py",
-        "-file",    "gs://${BUCKET}/scripts/reducer.py"
+        "-input",   "$INPUT_GCS",
+        "-output",  "$OUTPUT_GCS",
+        "-file",    "gs://$BUCKET/scripts/mapper.py",
+        "-file",    "gs://$BUCKET/scripts/reducer.py"
       ]
     }
   }
@@ -209,16 +209,20 @@ ENDJSON
                     echo "============================================================" | tee -a "$RESULTS_FILE"
 
                     # List output parts and download each
-                    curl -sf \
+                    PARTS=$(curl -sf \
                         -H "Authorization: Bearer $TOKEN" \
                         "https://storage.googleapis.com/storage/v1/b/$BUCKET/o?prefix=output/build-${BUILD_NUMBER}/part-" \
-                    | grep -o '"name":"[^"]*"' | sed 's/"name":"//;s/"//' \
-                    | while read PART; do
+                        | tr -d ' \n' | grep -o '"name":"output/[^"]*"' | sed 's/"name":"//;s/"//')
+
+                    for PART in $PARTS; do
+                        TOKEN=$(curl -sf -H "Metadata-Flavor: Google" \
+                            "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \
+                            | tr -d ' \n' | grep -o '"access_token":"[^"]*"' | head -1 | sed 's/"access_token":"//;s/"//')
                         ENCODED=$(echo "$PART" | sed 's|/|%2F|g')
                         curl -sf \
                             -H "Authorization: Bearer $TOKEN" \
-                            "https://storage.googleapis.com/storage/v1/b/$BUCKET/o/${ENCODED}?alt=media"
-                    done | tee -a "$RESULTS_FILE"
+                            "https://storage.googleapis.com/storage/v1/b/$BUCKET/o/${ENCODED}?alt=media" | tee -a "$RESULTS_FILE"
+                    done
 
                     echo "============================================================" | tee -a "$RESULTS_FILE"
                     echo "Results saved to: $RESULTS_FILE"
