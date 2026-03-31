@@ -133,7 +133,7 @@ pipeline {
                     OUTPUT_GCS="gs://$BUCKET/output/build-${BUILD_NUMBER}"
 
                     # Submit Dataproc streaming job
-                    JOB_ID=$(curl -sf -X POST \
+                    SUBMIT_RESPONSE=$(curl -s -X POST \
                         -H "Authorization: Bearer $TOKEN" \
                         -H "Content-Type: application/json" \
                         "https://dataproc.googleapis.com/v1/projects/${GCP_PROJECT}/regions/${DATAPROC_REGION}/jobs:submit" \
@@ -152,9 +152,16 @@ pipeline {
                                     ]
                                 }
                             }
-                        }" | sed 's/.*"jobId":"\\([^"]*\\)".*/\\1/')
+                        }")
 
+                    echo "Submit response: $SUBMIT_RESPONSE"
+                    JOB_ID=$(echo "$SUBMIT_RESPONSE" | tr -d ' \n' | grep -o '"jobId":"[^"]*"' | head -1 | sed 's/"jobId":"//;s/"//')
                     echo "Submitted Dataproc job: $JOB_ID"
+
+                    if [ -z "$JOB_ID" ]; then
+                        echo "ERROR: Job submission failed"
+                        exit 1
+                    fi
                     echo "JOB_ID=$JOB_ID" >> /tmp/hadoop-env-${BUILD_NUMBER}.sh
                     echo "BUCKET=$BUCKET" >> /tmp/hadoop-env-${BUILD_NUMBER}.sh
 
