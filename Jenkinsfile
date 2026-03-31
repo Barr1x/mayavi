@@ -138,7 +138,7 @@ pipeline {
   "job": {
     "placement": { "clusterName": "${DATAPROC_CLUSTER}" },
     "hadoopJob": {
-      "mainJarFileUri": "file:///usr/lib/hadoop-mapreduce/hadoop-streaming.jar",
+      "mainJarFileUri": "file:///usr/lib/hadoop/hadoop-streaming.jar",
       "args": [
         "-mapper",  "python3 mapper.py",
         "-reducer", "python3 reducer.py",
