@@ -86,7 +86,7 @@ pipeline {
 
                     # Prepare input: filename<TAB>line for .txt and .py files only
                     INPUT="/tmp/repo-lines-${BUILD_NUMBER}.txt"
-                    find . -type f \( -name '*.txt' -o -name '*.py' \) ! -path '*/.git/*' ! -path '*/.scannerwork/*' | sort | while read f; do
+                    find . -type f \( -name '*.txt' -o -name '*.py' \) ! -path '*/.git/*' ! -path '*/.scannerwork/*' | sort | while IFS= read -r f; do
                         rel="${f#./}"
                         while IFS= read -r line || [ -n "$line" ]; do
                             printf '%s\t%s\n' "$rel" "$line"
