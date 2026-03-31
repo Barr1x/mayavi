@@ -11,6 +11,16 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
+                    // Generate a fresh token using admin credentials (automated)
+                    def sonarToken = sh(
+                        script: """
+                            curl -sf -u admin:admin -X POST \
+                              '${SONAR_HOST_URL}/api/user_tokens/generate?name=jenkins-${BUILD_NUMBER}&login=admin' \
+                            | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])"
+                        """,
+                        returnStdout: true
+                    ).trim()
+
                     def scannerHome = tool 'SonarScanner'
                     withSonarQubeEnv('SonarQube') {
                         sh """
@@ -18,9 +28,16 @@ pipeline {
                                 -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                                 -Dsonar.sources=. \
                                 -Dsonar.python.version=3 \
-                                -Dsonar.host.url=${SONAR_HOST_URL}
+                                -Dsonar.host.url=${SONAR_HOST_URL} \
+                                -Dsonar.login=${sonarToken}
                         """
                     }
+
+                    // Revoke the token after use
+                    sh """
+                        curl -sf -u admin:admin -X POST \
+                          '${SONAR_HOST_URL}/api/user_tokens/revoke?name=jenkins-${BUILD_NUMBER}&login=admin' || true
+                    """
                 }
             }
         }
