@@ -16,7 +16,7 @@ pipeline {
                         script: """
                             curl -sf -u admin:admin -X POST \
                               '${SONAR_HOST_URL}/api/user_tokens/generate?name=jenkins-${BUILD_NUMBER}&login=admin' \
-                            | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])"
+                            | sed 's/.*"token":"\\([^"]*\\)".*/\\1/'
                         """,
                         returnStdout: true
                     ).trim()
@@ -50,7 +50,7 @@ pipeline {
                     def qgStatus = sh(
                         script: """
                             curl -sf '${SONAR_HOST_URL}/api/qualitygates/project_status?projectKey=${SONAR_PROJECT_KEY}' \
-                            | python3 -c "import sys,json; print(json.load(sys.stdin)['projectStatus']['status'])"
+                            | sed 's/.*"status":"\\([^"]*\\)".*/\\1/'
                         """,
                         returnStdout: true
                     ).trim()
