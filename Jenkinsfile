@@ -78,7 +78,7 @@ pipeline {
                     # Get GCS staging bucket name
                     TOKEN=$(curl -sf -H "Metadata-Flavor: Google" \
                         "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \
-                        | sed 's/.*"access_token":"\\([^"]*\\)".*/\\1/')
+                        | tr -d ' \n' | grep -o '"access_token":"[^"]*"' | head -1 | sed 's/"access_token":"//;s/"//')
 
                     BUCKET="${GCS_BUCKET}"
 
@@ -125,7 +125,7 @@ pipeline {
                 sh '''
                     TOKEN=$(curl -sf -H "Metadata-Flavor: Google" \
                         "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \
-                        | sed 's/.*"access_token":"\\([^"]*\\)".*/\\1/')
+                        | tr -d ' \n' | grep -o '"access_token":"[^"]*"' | head -1 | sed 's/"access_token":"//;s/"//')
 
                     BUCKET="${GCS_BUCKET}"
 
@@ -172,6 +172,9 @@ ENDJSON
 
                     # Poll until done
                     while true; do
+                        TOKEN=$(curl -sf -H "Metadata-Flavor: Google" \
+                            "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \
+                            | tr -d ' \n' | grep -o '"access_token":"[^"]*"' | head -1 | sed 's/"access_token":"//;s/"//')
                         STATE=$(curl -sf \
                             -H "Authorization: Bearer $TOKEN" \
                             "https://dataproc.googleapis.com/v1/projects/${GCP_PROJECT}/regions/${DATAPROC_REGION}/jobs/$JOB_ID" \
@@ -193,7 +196,7 @@ ENDJSON
                 sh '''
                     TOKEN=$(curl -sf -H "Metadata-Flavor: Google" \
                         "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \
-                        | sed 's/.*"access_token":"\\([^"]*\\)".*/\\1/')
+                        | tr -d ' \n' | grep -o '"access_token":"[^"]*"' | head -1 | sed 's/"access_token":"//;s/"//')
 
                     BUCKET="${GCS_BUCKET}"
 
