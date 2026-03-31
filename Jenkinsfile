@@ -175,7 +175,7 @@ ENDJSON
                         STATE=$(curl -sf \
                             -H "Authorization: Bearer $TOKEN" \
                             "https://dataproc.googleapis.com/v1/projects/${GCP_PROJECT}/regions/${DATAPROC_REGION}/jobs/$JOB_ID" \
-                            | sed 's/.*"state":"\\([^"]*\\)".*/\\1/' | head -1)
+                            | tr -d ' \n' | grep -o '"state":"[^"]*"' | head -1 | sed 's/"state":"//;s/"//')
                         echo "Job state: $STATE"
                         case "$STATE" in
                             DONE) echo "Job completed successfully"; break ;;
