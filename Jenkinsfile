@@ -132,27 +132,32 @@ pipeline {
                     INPUT_GCS="gs://$BUCKET/input/build-${BUILD_NUMBER}/repo-lines.txt"
                     OUTPUT_GCS="gs://$BUCKET/output/build-${BUILD_NUMBER}"
 
+                    # Write JSON payload to file to avoid quoting issues
+                    cat > /tmp/job-request-${BUILD_NUMBER}.json << ENDJSON
+{
+  "job": {
+    "placement": { "clusterName": "${DATAPROC_CLUSTER}" },
+    "hadoopJob": {
+      "mainJarFileUri": "file:///usr/lib/hadoop-mapreduce/hadoop-streaming.jar",
+      "args": [
+        "-mapper",  "python3 mapper.py",
+        "-reducer", "python3 reducer.py",
+        "-input",   "${INPUT_GCS}",
+        "-output",  "${OUTPUT_GCS}",
+        "-file",    "gs://${BUCKET}/scripts/mapper.py",
+        "-file",    "gs://${BUCKET}/scripts/reducer.py"
+      ]
+    }
+  }
+}
+ENDJSON
+
                     # Submit Dataproc streaming job
                     SUBMIT_RESPONSE=$(curl -s -X POST \
                         -H "Authorization: Bearer $TOKEN" \
                         -H "Content-Type: application/json" \
                         "https://dataproc.googleapis.com/v1/projects/${GCP_PROJECT}/regions/${DATAPROC_REGION}/jobs:submit" \
-                        -d "{
-                            \"job\": {
-                                \"placement\": { \"clusterName\": \"${DATAPROC_CLUSTER}\" },
-                                \"hadoopJob\": {
-                                    \"mainJarFileUri\": \"file:///usr/lib/hadoop-mapreduce/hadoop-streaming.jar\",
-                                    \"args\": [
-                                        \"-mapper\",  \"python3 mapper.py\",
-                                        \"-reducer\", \"python3 reducer.py\",
-                                        \"-input\",   \"$INPUT_GCS\",
-                                        \"-output\",  \"$OUTPUT_GCS\",
-                                        \"-file\",    \"gs://$BUCKET/scripts/mapper.py\",
-                                        \"-file\",    \"gs://$BUCKET/scripts/reducer.py\"
-                                    ]
-                                }
-                            }
-                        }")
+                        -d @/tmp/job-request-${BUILD_NUMBER}.json)
 
                     echo "Submit response: $SUBMIT_RESPONSE"
                     JOB_ID=$(echo "$SUBMIT_RESPONSE" | tr -d ' \n' | grep -o '"jobId":"[^"]*"' | head -1 | sed 's/"jobId":"//;s/"//')
