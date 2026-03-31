@@ -7,6 +7,7 @@ pipeline {
         GCP_PROJECT       = 'rising-apricot-491917-g5'
         DATAPROC_CLUSTER  = 'hadoop-cluster'
         DATAPROC_REGION   = 'us-central1'
+        GCS_BUCKET        = 'rising-apricot-491917-g5-dataproc-staging-d15a556e'
         RESULTS_DIR       = '/var/jenkins_home/hadoop-results'
     }
 
@@ -79,10 +80,7 @@ pipeline {
                         "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \
                         | sed 's/.*"access_token":"\\([^"]*\\)".*/\\1/')
 
-                    BUCKET=$(curl -sf \
-                        -H "Authorization: Bearer $TOKEN" \
-                        "https://storage.googleapis.com/storage/v1/b?project=${GCP_PROJECT}&prefix=rising-apricot-491917-g5-dataproc-staging" \
-                        | grep -o '"name":"rising-apricot[^"]*"' | head -1 | sed 's/"name":"//;s/"//')
+                    BUCKET="${GCS_BUCKET}"
 
                     echo "BUCKET=$BUCKET" > /tmp/hadoop-env-${BUILD_NUMBER}.sh
 
@@ -129,10 +127,7 @@ pipeline {
                         "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \
                         | sed 's/.*"access_token":"\\([^"]*\\)".*/\\1/')
 
-                    BUCKET=$(curl -sf \
-                        -H "Authorization: Bearer $TOKEN" \
-                        "https://storage.googleapis.com/storage/v1/b?project=${GCP_PROJECT}&prefix=rising-apricot-491917-g5-dataproc-staging" \
-                        | grep -o '"name":"rising-apricot[^"]*"' | head -1 | sed 's/"name":"//;s/"//')
+                    BUCKET="${GCS_BUCKET}"
 
                     INPUT_GCS="gs://$BUCKET/input/build-${BUILD_NUMBER}/repo-lines.txt"
                     OUTPUT_GCS="gs://$BUCKET/output/build-${BUILD_NUMBER}"
@@ -188,10 +183,7 @@ pipeline {
                         "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \
                         | sed 's/.*"access_token":"\\([^"]*\\)".*/\\1/')
 
-                    BUCKET=$(curl -sf \
-                        -H "Authorization: Bearer $TOKEN" \
-                        "https://storage.googleapis.com/storage/v1/b?project=${GCP_PROJECT}&prefix=rising-apricot-491917-g5-dataproc-staging" \
-                        | grep -o '"name":"rising-apricot[^"]*"' | head -1 | sed 's/"name":"//;s/"//')
+                    BUCKET="${GCS_BUCKET}"
 
                     mkdir -p "${RESULTS_DIR}"
                     RESULTS_FILE="${RESULTS_DIR}/build-${BUILD_NUMBER}.txt"
