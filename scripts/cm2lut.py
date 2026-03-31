@@ -25,6 +25,7 @@ lut_dic = {}
 # Some of the cmaps are listed in cm.datad, and others in _cm_listed.cmaps
 cmap_names = datad.keys()
 cmap_names.extend(cmaps.keys())
+hashMap = dict()
 
 for name in cmap_names:
     if name.endswith('_r'):
