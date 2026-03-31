@@ -139,13 +139,15 @@ pipeline {
     "placement": { "clusterName": "$DATAPROC_CLUSTER" },
     "hadoopJob": {
       "mainJarFileUri": "file:///usr/lib/hadoop/hadoop-streaming.jar",
+      "fileUris": [
+        "gs://$BUCKET/scripts/mapper.py",
+        "gs://$BUCKET/scripts/reducer.py"
+      ],
       "args": [
         "-mapper",  "python3 mapper.py",
         "-reducer", "python3 reducer.py",
         "-input",   "$INPUT_GCS",
-        "-output",  "$OUTPUT_GCS",
-        "-file",    "gs://$BUCKET/scripts/mapper.py",
-        "-file",    "gs://$BUCKET/scripts/reducer.py"
+        "-output",  "$OUTPUT_GCS"
       ]
     }
   }
