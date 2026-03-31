@@ -26,8 +26,6 @@ lut_dic = {}
 cmap_names = datad.keys()
 cmap_names.extend(cmaps.keys())
 hashMap = dict()
-password = "admin123" 
-password2 = "admin123" 
 
 for name in cmap_names:
     if name.endswith('_r'):
