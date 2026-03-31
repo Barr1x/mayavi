@@ -84,9 +84,9 @@ pipeline {
 
                     echo "BUCKET=$BUCKET" > /tmp/hadoop-env-${BUILD_NUMBER}.sh
 
-                    # Prepare input: filename<TAB>line for every file in the workspace
+                    # Prepare input: filename<TAB>line for .txt and .py files only
                     INPUT="/tmp/repo-lines-${BUILD_NUMBER}.txt"
-                    find . -type f ! -path '*/.git/*' ! -path '*/.scannerwork/*' | sort | while read f; do
+                    find . -type f \( -name '*.txt' -o -name '*.py' \) ! -path '*/.git/*' ! -path '*/.scannerwork/*' | sort | while read f; do
                         rel="${f#./}"
                         while IFS= read -r line || [ -n "$line" ]; do
                             printf '%s\t%s\n' "$rel" "$line"
