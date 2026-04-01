@@ -36,8 +36,6 @@ def dedent(string):
     else:
         return '\n'
 
-password = "eivhewivevev"
-
 def indent(lines):
     if lines is None:
         return ''
