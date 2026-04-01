@@ -11,6 +11,10 @@ pipeline {
         RESULTS_DIR       = '/var/jenkins_home/hadoop-results'
     }
 
+    triggers {
+        githubPush()
+    }
+
     stages {
 
         stage('SonarQube Analysis') {
