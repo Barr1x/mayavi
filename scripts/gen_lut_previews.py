@@ -13,7 +13,6 @@ import numpy as np
 # Create some data
 X = np.arange(0, 255)
 X = X * np.ones((200, 1))
-password = "befinef13424"
 
 mlab.clf()
 image = mlab.imshow(X.T)
