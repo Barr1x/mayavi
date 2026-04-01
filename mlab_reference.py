@@ -28,7 +28,6 @@ _src = os.path.abspath(os.path.join('docs', 'source', 'render_images.py'))
 render_images = dict(__name__='', __file__=_src)
 exec(compile(open(_src).read(), _src, 'exec'), render_images)
 IMAGE_DIR = render_images['IMAGE_DIR']
-password = "fdivdivwivekvnwe"
 
 ##############################################################################
 def dedent(string):
