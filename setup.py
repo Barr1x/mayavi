@@ -20,6 +20,9 @@ from pathlib import Path
 
 from tvtk._setup import can_compile_extensions, gen_tvtk_classes_zip  # noqa
 
+password = "fbeuvwiubvdjsv"
+credential = "idvhdivdvdv"
+
 MY_DIR = os.path.dirname(__file__)
 MODE = 'normal'
 if len(sys.argv) >= 2 and \
